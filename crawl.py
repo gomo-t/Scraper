@@ -8,112 +8,103 @@ from selenium.webdriver.common.keys import Keys
 import time
 import csv
 
-#Earliest date is 1 Jan 2007
-#Input for DD-MM-YYYY format
-search_date =input('Enter search date: DD MM YYYY: ')
+def fetch_and_retrieve_data(search_date):
+    # Path to the GeckoDriver (Firefox WebDriver) executable
+    geckodriver_path = r'C:\\Users\\Tendekayi Gomo\\OneDrive\\Pulpit\\Trading Project\\Scraper\\geckodriver.exe'
 
-# Path to the GeckoDriver (Firefox WebDriver) executable
-geckodriver_path = r'C:\\Users\\Tendekayi Gomo\\OneDrive\\Pulpit\\Trading Project\\Scraper\\geckodriver.exe'
+    # Path to the Firefox binary (replace this with your actual Firefox binary path)
+    firefox_binary_path = r'C:\\Program Files\\Mozilla Firefox\\firefox.exe'
 
-# Path to the Firefox binary (replace this with your actual Firefox binary path)
-firefox_binary_path = r'C:\\Program Files\\Mozilla Firefox\\firefox.exe'
+    # Create a FirefoxOptions instance
+    firefox_options = Options()
 
-# Create a FirefoxOptions instance
-firefox_options = Options()
+    # Set Firefox to run in headless mode
+    firefox_options.add_argument('--headless')
+    firefox_options.binary_location = firefox_binary_path
 
-# Set Firefox to run in headless mode
-firefox_options.add_argument('--headless')
+    # Create a service object
+    service = Service(geckodriver_path)
 
-firefox_options.binary_location = firefox_binary_path
+    # Start the WebDriver service
+    service.start()
 
-# Create a service object
-service = Service(geckodriver_path)
+    # Create a Firefox WebDriver instance with specified options
+    driver = webdriver.Firefox(service=service, options=firefox_options)
 
-# Start the WebDriver service
-service.start()
+    # Now you can use 'driver' to interact with the browser
+    driver.get('https://metalsmine.com/calendar')
 
-# Create a Firefox WebDriver instance with specified options
-driver = webdriver.Firefox(service=service, options=firefox_options)
+    # Wait for the date sorter element to be clickable
+    wait = WebDriverWait(driver, 10)
+    date_search = wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[4]/div/div[1]/section[2]/div[3]/div/div/div/div/div[1]/ul/li[2]/h2/a")))
+    date_search.click()
 
-# Now you can use 'driver' to interact with the browser
-driver.get('https://metalsmine.com/calendar')
+    # Wait and click the input field
+    date_search2 = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="calendar-date-range-1"]')))
+    date_search2.click()
 
-# Wait for the date sorter element to be clickable
-wait = WebDriverWait(driver, 10)
-date_search = wait.until(EC.element_to_be_clickable((By.XPATH, "/html/body/div[4]/div/div[1]/section[2]/div[3]/div/div/div/div/div[1]/ul/li[2]/h2/a")))
-date_search.click()
+    # Enter search range for calendar
 
-#Wait and click the input field
-date_search2 = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="calendar-date-range-1"]')))
-date_search2.click()
+    # Perform Control + A (select all)
+    date_search2.send_keys(Keys.CONTROL + 'a')
 
-#Enter search range for calendar
+    # Perform Backspace (delete the selected text)
+    date_search2.send_keys(Keys.BACKSPACE)
 
-# Perform Control + A (select all)
-date_search2.send_keys(Keys.CONTROL + 'a')
+    # Input date text for the field
+    date_search2.send_keys(search_date)
 
-# Perform Backspace (delete the selected text)
-date_search2.send_keys(Keys.BACKSPACE)
+    # Extra step to exit search box
 
-#Input date text for the field
-date_search2.send_keys(search_date)
+    # Initiate search query
+    exit_away_search = wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="default_view_1"]')))
+    exit_away_search.click()
 
-#Extra step to exit search box
+    # Initiate search query
+    apply_search = wait.until(EC.element_to_be_clickable((By.XPATH, '/html/body/div[4]/div/div[1]/section[2]/div[3]/div/div/div/div/div[2]/div[1]/div/table/tbody/tr/td[2]/input[1]')))
+    apply_search.click()
 
-#Iniatiate search query
-exit_away_search= wait.until(EC.element_to_be_clickable((By.XPATH, '//*[@id="default_view_1"]')))
-exit_away_search.click()
+    # Check for Day of the week
+    day_of_week = wait.until(EC.presence_of_element_located((By.XPATH, '/html/body/div[4]/div/div[1]/section[2]/div[3]/div/div/div/div/table/tbody/tr[2]/td[1]/span')))
 
-#Iniatiate search query
-apply_search= wait.until(EC.element_to_be_clickable((By.XPATH, '/html/body/div[4]/div/div[1]/section[2]/div[3]/div/div/div/div/div[2]/div[1]/div/table/tbody/tr/td[2]/input[1]')))
-apply_search.click()
+    # Get the text of the element
+    date_of_week_text = day_of_week.text.split()
+    day_of_week_text = date_of_week_text[0]
 
-#Check for Day of the week  
-day_of_week = wait.until(EC.presence_of_element_located((By.XPATH, '/html/body/div[4]/div/div[1]/section[2]/div[3]/div/div/div/div/table/tbody/tr[2]/td[1]/span')))
+    if day_of_week_text not in ['Sun', 'Sat']:
+        # Retrieve information from the table
+        rows = wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'calendar__row--grey')))
 
-# Get the text of the element
-date_of_week_text = day_of_week.text.split()
-day_of_week_text = date_of_week_text[0]
-#print("Text of the element:", day_of_week_text)
+        # Define CSV file path and open it for writing
+        csv_file_path = 'calendar_data.csv'
+        with open(csv_file_path, mode='w', newline='') as csv_file:
+            writer = csv.writer(csv_file)
+            writer.writerow(['Time', 'Event Title', 'Impact'])  # Write header row
 
-if(day_of_week_text !='Sun' and day_of_week_text !=  'Sat'):
-    #retrive information from the table
-    rows = wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'calendar__row--grey')))
+            # Iterate through each row and extract the desired information
+            for row in rows:
+                try:
+                    time_element = row.find_element(By.CLASS_NAME, 'calendar__time').text
+                    event_title_element = row.find_element(By.CLASS_NAME, 'calendar__event-title').text
+                    impact_element = row.find_element(By.XPATH, '/html/body/div[4]/div/div[1]/section[2]/div[3]/div/div/div/div/table/tbody/tr[3]/td[3]/span').get_attribute('title')
+                    writer.writerow([time_element, event_title_element, impact_element])  # Write row to CSV
+                except Exception as e:
+                    print(f"Error extracting data from row: {e}")
 
+        # Representation of the event data
+        #print(f"Time: {time_element}\tEvent Title: {event_title_element}\tImpact: {impact_element}\n")
 
-    # Define CSV file path and open it for writing
-    csv_file_path = 'calendar_data.csv'
-    with open(csv_file_path, mode='w', newline='') as csv_file:
-        writer = csv.writer(csv_file)
-        writer.writerow(['Time', 'Event Title', 'Impact'])  # Write header row
-
-        # Iterate through each row and extract the desired information
-        for row in rows:
-            try:
-                time_element = row.find_element(By.CLASS_NAME, 'calendar__time').text
-                event_title_element = row.find_element(By.CLASS_NAME, 'calendar__event-title').text
-                impact_element = row.find_element(By.XPATH, '/html/body/div[4]/div/div[1]/section[2]/div[3]/div/div/div/div/table/tbody/tr[3]/td[3]/span').get_attribute('title')
-                writer.writerow([time_element, event_title_element, impact_element])  # Write row to CSV
-            except Exception as e:
-                     print(f"Error extracting data from row: {e}")
-
-
-
-    #Representation of the event data
-    print(f"Time: {time_element}\tEvent Title: {event_title_element}\tImpact: {impact_element}\n")
-
-
+    else:
+        print('Weekend\nDone!')
 
     # Don't forget to quit the driver and stop the service when done
     driver.quit()
     service.stop()
 
-
-    #exit signal
+    # Exit signal
     print('Done!')
 
-else:
-    print('Weekend\nDone!')
-    driver.quit()
-    service.stop()
-    exit()
+# Earliest date is 1 Jan 2007
+# Input for DD-MM-YYYY format
+search_date = input('Enter search date: DD MM YYYY: ')
+fetch_and_retrieve_data(search_date)
