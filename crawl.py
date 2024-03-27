@@ -7,6 +7,10 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 import time
 
+#Earliest date is 1 Jan 2007
+#Input for DD-MM-YYYY format
+search_date =input('Enter search date: DD MM YYYY: ')
+
 # Path to the GeckoDriver (Firefox WebDriver) executable
 geckodriver_path = r'C:\\Users\\Tendekayi Gomo\\OneDrive\\Pulpit\\Trading Project\\Scraper\\geckodriver.exe'
 
@@ -47,7 +51,7 @@ date_search2.send_keys(Keys.CONTROL + 'a')
 date_search2.send_keys(Keys.BACKSPACE)
 
 #Input date text for the field
-date_search2.send_keys('13 Mar 2014')
+date_search2.send_keys(search_date)
 
 #Extra step to exit search box
 
@@ -66,12 +70,11 @@ rows = wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'calendar_
 for row in rows:
     time_element = row.find_element(By.CLASS_NAME, 'calendar__time').text
     event_title_element = row.find_element(By.CLASS_NAME, 'calendar__event-title').text
-    impact_element = row.find_element(By.CLASS_NAME, 'calendar__impact').get_attribute('title')
+    impact_element = row.find_element(By.XPATH, '/html/body/div[4]/div/div[1]/section[2]/div[3]/div/div/div/div/table/tbody/tr[3]/td[3]/span').get_attribute('title')
 
 #Representation of the event data
     print(f"Time: {time_element}\tEvent Title: {event_title_element}\tImpact: {impact_element}\n")
     
-
 time.sleep(30)
 
 
