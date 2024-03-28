@@ -100,9 +100,9 @@ def SearchDate(search_date ):
 
 
         #Representation of the event data
-        print(f"Time: {time_element}\tEvent Title: {event_title_element}\tImpact: {impact_element}\n")
+        #print(f"Time: {time_element}\tEvent Title: {event_title_element}\tImpact: {impact_element}\n")
 
-
+        time.sleep(10)
 
         # Don't forget to quit the driver and stop the service when done
         driver.quit()
@@ -113,6 +113,7 @@ def SearchDate(search_date ):
         print('Done!')
 
     else:
+        time.sleep(10)
         print('Weekend\nDone!')
         driver.quit()
         service.stop()
