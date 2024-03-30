@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from crawl import SearchDate as sd
+from histCsvHelper import DataTransfer as dt
 import time
 
 
@@ -26,5 +27,6 @@ def historyCrawl(queryStart1,queryStart2):
             search_date = current_date.strftime(date_format)
             sd(search_date)  # Call the sd function from the crawl module
             current_date += timedelta(days=1)  # Increment the current date by one day
+            dt()#append csv
             time.sleep(60)#So as the scrapper wont overload the server with requests
 
