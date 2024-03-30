@@ -25,6 +25,7 @@ if args.date:
     specified_date = args.date
     # Call the dayCrawl method with the specified date
     dc(specified_date)
+    
 if args.histStartDate:
     histStartSpecified_date = args.histStartDate
 

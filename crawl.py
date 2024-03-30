@@ -5,13 +5,14 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
+from csvCleaner import cleaner as cl
 import time
 import csv
 
 
 
 def SearchDate(search_date ):
-
+    
     # Path to the GeckoDriver (Firefox WebDriver) executable
     geckodriver_path = r'C:\\Users\\Tendekayi Gomo\\OneDrive\\Pulpit\\Trading Project\\Scraper\\geckodriver.exe'
 
@@ -37,6 +38,8 @@ def SearchDate(search_date ):
 
     # Now you can use 'driver' to interact with the browser
     driver.get('https://metalsmine.com/calendar')
+
+    
 
     # Wait for the date sorter element to be clickable
     wait = WebDriverWait(driver, 10)
@@ -96,7 +99,7 @@ def SearchDate(search_date ):
                     writer.writerow([time_element, event_title_element, impact_element])  # Write row to CSV
                 except Exception as e:
                          print(f"Error extracting data from row: {e}")
-
+        cl(csv_file_path)
 
 
         #Representation of the event data

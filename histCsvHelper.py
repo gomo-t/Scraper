@@ -1,4 +1,5 @@
 import csv
+from csvCleaner import cleaner as cl
 
 
 def DataTransfer():
@@ -17,5 +18,7 @@ def DataTransfer():
     with open(destination_csv_file, mode='a', newline='') as destination_file:
         writer = csv.writer(destination_file)
         writer.writerows(data_to_append)
+        
 
     print("Data copied and appended to destination CSV file successfully.")
+    #cl(destination_csv_file)
